@@ -25,6 +25,7 @@ public class LightHTTPServer implements HTTPServer {
 	public void start() {
 		serverThread = new LightHTTPServerThread(this);
 		serverThread.start();
+		System.out.println("Light HTTP Server has started.");
 	}
 
 	@Override
@@ -41,6 +42,7 @@ public class LightHTTPServer implements HTTPServer {
 	public void stop() {
 		try {
 			serverThread.join();
+			System.out.println("Light HTTP Server has stopped.");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

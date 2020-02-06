@@ -52,7 +52,6 @@ public class LightHTTPServerThread extends Thread {
 			Iterator<SelectionKey> readyIterator = readyKeys.iterator();
 			while (readyIterator.hasNext()) {
 				SelectionKey key = readyIterator.next();
-				readyIterator.remove();
 				
 				try {
 					if (key.isAcceptable()) {
@@ -70,6 +69,8 @@ public class LightHTTPServerThread extends Thread {
 						key.channel().close();
 					} catch (IOException cex) {}
 				}
+
+				readyIterator.remove();
 			}
 		}
 	}
@@ -83,7 +84,7 @@ public class LightHTTPServerThread extends Thread {
 		public void accept(SelectionKey key) throws IOException {
 			ServerSocketChannel channel = (ServerSocketChannel) key.channel();
 			SocketChannel client = channel.accept();
-			
+			client.configureBlocking(false);
 			client.register(selector, SelectionKey.OP_READ);
 		}
 		

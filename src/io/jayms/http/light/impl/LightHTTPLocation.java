@@ -2,9 +2,10 @@ package io.jayms.http.light.impl;
 
 import java.util.Objects;
 
+import io.jayms.http.light.interfaces.HTTPLocation;
 import io.jayms.http.light.interfaces.HTTPMethod;
 
-public class LightHTTPLocation {
+public class LightHTTPLocation implements HTTPLocation {
 
 	private String path;
 	private HTTPMethod method;
@@ -14,11 +15,11 @@ public class LightHTTPLocation {
 		this.method = method;
 	}
 	
-	public String getPath() {
+	public String path() {
 		return path;
 	}
 	
-	public HTTPMethod getMethod() {
+	public HTTPMethod method() {
 		return method;
 	}
 	
