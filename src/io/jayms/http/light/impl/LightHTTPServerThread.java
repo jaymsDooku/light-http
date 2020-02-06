@@ -107,6 +107,9 @@ public class LightHTTPServerThread extends Thread {
 			SocketAddress address = client.getRemoteAddress();
 			
 			ByteBuffer buffer = (ByteBuffer) key.attachment();
+			if (buffer == null) {
+				// TODO: read the incoming request into a buffer then process it
+			}
 			client.read(buffer);
 			clientManager.putRequest(address, buffer);
 			

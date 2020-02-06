@@ -20,7 +20,7 @@ public class LightHTTPClientManager implements HTTPClientManager {
 	
 	@Override
 	public void putResponse(SocketAddress address, ByteBuffer payload) {
-		
+		System.out.println("payload: " + payload);
 	}
 
 	@Override

@@ -13,6 +13,8 @@ public class LightHTTPServer implements HTTPServer {
 	private Thread serverThread;
 	
 	public LightHTTPServer(int port) {
+		this.context = new LightHTTPContext();
+		this.clientManager = new LightHTTPClientManager();
 		this.port = port;
 	}
 	
