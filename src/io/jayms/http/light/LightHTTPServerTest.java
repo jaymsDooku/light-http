@@ -21,6 +21,10 @@ public class LightHTTPServerTest {
 		});
 
 		server.start();
+
+		/*String s = "hello\r\n";
+		String[] sp = s.split("\r\n");
+		System.out.println("sp len : " + sp.length);*/
 	}
 	
 }

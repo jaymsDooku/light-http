@@ -8,10 +8,13 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import io.jayms.http.light.interfaces.HTTPClientManager;
+import io.jayms.http.light.interfaces.HTTPPayload;
 import io.jayms.http.light.interfaces.util.SelectionKeyHandler;
 
 public class LightHTTPServerThread extends Thread {
@@ -92,6 +95,9 @@ public class LightHTTPServerThread extends Thread {
 		public void write(SelectionKey key) throws IOException {
 			SocketChannel client = (SocketChannel) key.channel();
 			ByteBuffer buffer = (ByteBuffer) key.attachment();
+			if (buffer == null) {
+				return;
+			}
 			if (buffer.hasRemaining()) {
 				client.write(buffer);
 			} else {
@@ -105,16 +111,26 @@ public class LightHTTPServerThread extends Thread {
 			
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
-			
-			ByteBuffer buffer = (ByteBuffer) key.attachment();
-			if (buffer == null) {
-				// TODO: read the incoming request into a buffer then process it
-			}
-			client.read(buffer);
-			clientManager.putRequest(address, buffer);
+
+			List<ByteBuffer> buffers = new ArrayList<>();
+			ByteBuffer buffer;
+			int read = 0;
+			do {
+				buffer = ByteBuffer.allocate(1024 * 8);
+				read = client.read(buffer);
+				if (read > 0) {
+					buffer.flip();
+					buffers.add(buffer);
+				}
+			} while (read > 0);
+			clientManager.putRequest(address, buffers);
 			
 			key.interestOps(SelectionKey.OP_WRITE);
-			key.attach(httpServer.clientManager().getResponse(address));
+
+			HTTPPayload payload = httpServer.clientManager().getResponse(address);
+			if (payload != null) {
+				key.attach(httpServer.clientManager().getResponse(address).encode());
+			}
 		}
 		
 	}
