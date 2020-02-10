@@ -13,8 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import io.jayms.http.light.interfaces.HTTPClientManager;
 import io.jayms.http.light.interfaces.HTTPPayload;
+import io.jayms.http.light.interfaces.HTTPSessionManager;
 import io.jayms.http.light.interfaces.util.SelectionKeyHandler;
 
 public class LightHTTPServerThread extends Thread {
@@ -94,7 +94,13 @@ public class LightHTTPServerThread extends Thread {
 		@Override
 		public void write(SelectionKey key) throws IOException {
 			SocketChannel client = (SocketChannel) key.channel();
-			ByteBuffer buffer = (ByteBuffer) key.attachment();
+			SocketAddress address = client.getRemoteAddress();
+			HTTPPayload payload = httpServer.sessionManager().getSession(address).pollResponse();
+			System.out.println("trying to write to " + address);
+			if (payload == null) {
+				return;
+			}
+			ByteBuffer buffer = payload.encode();
 			if (buffer == null) {
 				return;
 			}
@@ -107,7 +113,7 @@ public class LightHTTPServerThread extends Thread {
 		
 		@Override
 		public void read(SelectionKey key) throws IOException {
-			HTTPClientManager clientManager = httpServer.clientManager();
+			HTTPSessionManager sessionManager = httpServer.sessionManager();
 			
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
@@ -123,14 +129,9 @@ public class LightHTTPServerThread extends Thread {
 					buffers.add(buffer);
 				}
 			} while (read > 0);
-			clientManager.putRequest(address, buffers);
+			sessionManager.putRequest(address, buffers);
 			
 			key.interestOps(SelectionKey.OP_WRITE);
-
-			HTTPPayload payload = httpServer.clientManager().getResponse(address);
-			if (payload != null) {
-				key.attach(httpServer.clientManager().getResponse(address).encode());
-			}
 		}
 		
 	}

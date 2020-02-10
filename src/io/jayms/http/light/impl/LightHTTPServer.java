@@ -1,20 +1,20 @@
 package io.jayms.http.light.impl;
 
-import io.jayms.http.light.interfaces.HTTPClientManager;
 import io.jayms.http.light.interfaces.HTTPContext;
 import io.jayms.http.light.interfaces.HTTPServer;
+import io.jayms.http.light.interfaces.HTTPSessionManager;
 
 public class LightHTTPServer implements HTTPServer {
 
 	private int port;
 	private HTTPContext context;
-	private HTTPClientManager clientManager;
+	private HTTPSessionManager sessionManager;
 	
 	private Thread serverThread;
 	
 	public LightHTTPServer(int port) {
 		this.context = new LightHTTPContext();
-		this.clientManager = new LightHTTPClientManager();
+		this.sessionManager = new LightHTTPSessionManager();
 		this.port = port;
 	}
 	
@@ -36,8 +36,8 @@ public class LightHTTPServer implements HTTPServer {
 	}
 	
 	@Override
-	public HTTPClientManager clientManager() {
-		return clientManager;
+	public HTTPSessionManager sessionManager() {
+		return sessionManager;
 	}
 
 	@Override

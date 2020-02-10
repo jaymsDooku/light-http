@@ -1,23 +1,54 @@
 package io.jayms.http.light.impl;
 
+import io.jayms.http.light.interfaces.HTTPMethod;
 import io.jayms.http.light.interfaces.HTTPPayload;
 import io.jayms.http.light.interfaces.HTTPPayloadParser;
 
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class LightHTTPPayloadParser implements HTTPPayloadParser {
 
     @Override
-    public HTTPPayload parse(List<ByteBuffer> buffers) {
+    public HTTPPayload parse(SocketAddress address, List<ByteBuffer> buffers) {
         System.out.println("Parsing " + buffers.size() + " buffer(s) into a payload...");
-        StringBuilder header = new StringBuilder();
+        HeaderParseResult headerParseResult = parseHeader(buffers);
 
-        List<ByteBuffer> remainingBuffers;
+        String header = headerParseResult.header;
+        String[] headerLines = header.split("\r\n");
+        String protocol = headerLines[0];
+        headerLines = Arrays.copyOfRange(headerLines, 1, headerLines.length);
+        Map<String, Object> payloadHeader = new HashMap<>();
+        for (String headerLine : headerLines) {
+            String[] headerLineParts = headerLine.split(":");
+            //System.out.println("headerLineParts: " + Arrays.toString(headerLineParts));
+            headerLineParts[1] = headerLineParts[1].substring(1);
+            payloadHeader.put(headerLineParts[0], headerLineParts[1]);
+        }
+
+        List<ByteBuffer> remainingBuffers = headerParseResult.remainingBuffers;
+
+        String[] protocolParts = protocol.split(" ");
+        String protocolMethod = protocolParts[0];
+        String protocolPath = protocolParts[1];
+        String protocolVersion = protocolParts[2];
+        HTTPMethod method = HTTPMethod.valueOf(protocolMethod);
+        HTTPPayload payload = LightHTTPRequest.builder(address)
+                .header(payloadHeader)
+                .method(method)
+                .path(protocolPath)
+                .build();
+        System.out.println("payloadHeader: " + payloadHeader);
+        return payload;
+    }
+
+    private HeaderParseResult parseHeader(List<ByteBuffer> buffers) {
+        StringBuilder headerBuilder = new StringBuilder();
+
+        List<ByteBuffer> remainingBuffers = null;
         Iterator<ByteBuffer> buffersIterator = buffers.iterator();
         while (buffersIterator.hasNext()) {
             ByteBuffer byteBuffer = buffersIterator.next();
@@ -28,7 +59,7 @@ public class LightHTTPPayloadParser implements HTTPPayloadParser {
             System.out.println("data: " + data);
             String[] dataParts = data.split("\r\n\r\n");
             if (dataParts.length > 0) {
-                header.append(dataParts[0]);
+                headerBuilder.append(dataParts[0]);
 
                 remainingBuffers = new ArrayList<>();
                 if (dataParts.length > 1) {
@@ -39,11 +70,21 @@ public class LightHTTPPayloadParser implements HTTPPayloadParser {
                 buffersIterator.forEachRemaining(remainingBuffers::add);
                 break;
             } else {
-                header.append(data);
+                headerBuilder.append(data);
             }
         }
 
-        System.out.println("header: " + header);
-        return null;
+        HeaderParseResult result = new HeaderParseResult();
+        result.header = headerBuilder.toString();
+        result.remainingBuffers = remainingBuffers;
+        return result;
     }
+
+    private class HeaderParseResult {
+
+        String header;
+        List<ByteBuffer> remainingBuffers;
+
+    }
+
 }

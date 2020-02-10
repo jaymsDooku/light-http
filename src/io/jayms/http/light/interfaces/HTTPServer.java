@@ -8,7 +8,7 @@ public interface HTTPServer {
 	
 	HTTPContext context();
 	
-	HTTPClientManager clientManager();
+	HTTPSessionManager sessionManager();
 	
 	void stop();
 	

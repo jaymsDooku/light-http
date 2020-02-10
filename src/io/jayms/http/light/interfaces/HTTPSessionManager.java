@@ -4,14 +4,12 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public interface HTTPClientManager {
+public interface HTTPSessionManager {
 	
 	void putResponse(SocketAddress address, ByteBuffer payload);
 	
 	void putRequest(SocketAddress address, List<ByteBuffer> payload);
 
-	HTTPPayload getResponse(SocketAddress address);
-	
-	HTTPPayload getRequest(SocketAddress address);
+	HTTPSession getSession(SocketAddress address);
 	
 }
