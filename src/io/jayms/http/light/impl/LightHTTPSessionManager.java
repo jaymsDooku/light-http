@@ -4,6 +4,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 
 	@Override
 	public void putRequest(SocketAddress address, List<ByteBuffer> payload) {
-		HTTPPayload httpPayload = payloadParser.parse(payload);
+		HTTPPayload httpPayload = payloadParser.parse(address, payload);
 		HTTPSession session = getSession(address);
 		session.putRequest((HTTPRequest) httpPayload);
 	}
@@ -40,5 +41,15 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 			session = new LightHTTPSession(address);
 		}
 		return session;
+	}
+
+	@Override
+	public Collection<HTTPSession> getSessions() {
+		return sessionMap.values();
+	}
+
+	@Override
+	public void terminate(SocketAddress address) {
+		sessionMap.remove(address);
 	}
 }

@@ -1,8 +1,9 @@
 package io.jayms.http.light.impl;
 
-import io.jayms.http.light.interfaces.HTTPContext;
-import io.jayms.http.light.interfaces.HTTPServer;
-import io.jayms.http.light.interfaces.HTTPSessionManager;
+import io.jayms.http.light.interfaces.*;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LightHTTPServer implements HTTPServer {
 
@@ -11,6 +12,7 @@ public class LightHTTPServer implements HTTPServer {
 	private HTTPSessionManager sessionManager;
 	
 	private Thread serverThread;
+	private LightHTTPRequestProcessor requestProcessor;
 	
 	public LightHTTPServer(int port) {
 		this.context = new LightHTTPContext();
@@ -25,6 +27,18 @@ public class LightHTTPServer implements HTTPServer {
 	
 	@Override
 	public void start() {
+		requestProcessor = new LightHTTPRequestProcessor(this);
+		requestProcessor.registerRequestHandler(HTTPMethod.GET, new HTTPRequestHandler() {
+
+			@Override
+			public HTTPResponse handle(HTTPRequest request) {
+				
+
+				return null;
+			}
+
+		});
+		requestProcessor.start();
 		serverThread = new LightHTTPServerThread(this);
 		serverThread.start();
 		System.out.println("Light HTTP Server has started.");
@@ -44,6 +58,7 @@ public class LightHTTPServer implements HTTPServer {
 	public void stop() {
 		try {
 			serverThread.join();
+			requestProcessor.join();
 			System.out.println("Light HTTP Server has stopped.");
 		} catch (InterruptedException e) {
 			e.printStackTrace();

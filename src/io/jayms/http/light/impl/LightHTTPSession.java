@@ -21,18 +21,27 @@ public class LightHTTPSession implements HTTPSession {
         this.responseQueue = new ConcurrentLinkedQueue<>();
     }
 
+    @Override
+    public SocketAddress getAddress() {
+        return address;
+    }
+
+    @Override
     public void putRequest(HTTPRequest request) {
         requestQueue.add(request);
     }
 
+    @Override
     public HTTPRequest popRequest() {
         return requestQueue.poll();
     }
 
+    @Override
     public void putResponse(HTTPResponse response) {
         responseQueue.add(response);
     }
 
+    @Override
     public HTTPResponse pollResponse() {
         return responseQueue.poll();
     }

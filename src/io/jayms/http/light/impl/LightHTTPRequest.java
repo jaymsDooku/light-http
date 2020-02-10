@@ -12,7 +12,7 @@ public class LightHTTPRequest<T> extends LightHTTPPayload<T> implements HTTPRequ
     private String path;
     private HTTPMethod method;
 
-    public LightHTTPRequest(LightHTTPRequestBuilder<T> builder) {
+    private LightHTTPRequest(LightHTTPRequestBuilder<T> builder) {
         super(builder.address, builder.header, builder.body);
         this.path = builder.path;
         this.method = builder.method;
