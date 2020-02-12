@@ -13,7 +13,7 @@ public class LightHTTPRequest<T> extends LightHTTPPayload<T> implements HTTPRequ
     private HTTPMethod method;
 
     private LightHTTPRequest(LightHTTPRequestBuilder<T> builder) {
-        super(builder.address, builder.header, builder.body);
+        super(builder.address, builder.header, builder.version, builder.body);
         this.path = builder.path;
         this.method = builder.method;
     }
@@ -36,20 +36,22 @@ public class LightHTTPRequest<T> extends LightHTTPPayload<T> implements HTTPRequ
                 '}';
     }
 
-    public static LightHTTPRequestBuilder builder(SocketAddress address) {
-        return new LightHTTPRequestBuilder(address);
+    public static LightHTTPRequestBuilder builder(SocketAddress address, String version) {
+        return new LightHTTPRequestBuilder(address, version);
     }
 
     public static class LightHTTPRequestBuilder<T> {
 
         private SocketAddress address;
         private Map<String, Object> header;
+        private String version;
         private T body;
         private String path;
         private HTTPMethod method;
 
-        LightHTTPRequestBuilder(SocketAddress address) {
+        LightHTTPRequestBuilder(SocketAddress address, String version) {
             this.address = address;
+            this.version = version;
         }
 
         public LightHTTPRequestBuilder header(Map<String, Object> header) {

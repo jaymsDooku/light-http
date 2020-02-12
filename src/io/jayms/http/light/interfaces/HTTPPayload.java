@@ -8,6 +8,8 @@ public interface HTTPPayload<T> {
 
 	SocketAddress getAddress();
 
+	String getVersion();
+
 	Map<String, Object> getHeader();
 	
 	T getBody();

@@ -10,17 +10,24 @@ public class LightHTTPPayload<T> implements HTTPPayload<T> {
 
     private SocketAddress address;
     private Map<String, Object> header;
+    private String version;
     private T body;
 
-    public LightHTTPPayload(SocketAddress address, Map<String, Object> header, T body) {
+    public LightHTTPPayload(SocketAddress address, Map<String, Object> header, String version, T body) {
         this.address = address;
         this.header = header;
+        this.version = version;
         this.body = body;
     }
 
     @Override
     public SocketAddress getAddress() {
         return address;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
     }
 
     @Override

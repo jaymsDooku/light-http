@@ -96,10 +96,10 @@ public class LightHTTPServerThread extends Thread {
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
 			HTTPPayload payload = httpServer.sessionManager().getSession(address).pollResponse();
-			System.out.println("trying to write to " + address);
 			if (payload == null) {
 				return;
 			}
+			System.out.println("wrote to " + address);
 			ByteBuffer buffer = payload.encode();
 			if (buffer == null) {
 				return;
