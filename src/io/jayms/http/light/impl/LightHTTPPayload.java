@@ -1,6 +1,8 @@
 package io.jayms.http.light.impl;
 
+import io.jayms.http.light.interfaces.HTTPHeaders;
 import io.jayms.http.light.interfaces.HTTPPayload;
+import io.jayms.http.light.interfaces.content.ContentType;
 
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
@@ -10,6 +12,7 @@ public class LightHTTPPayload<T> implements HTTPPayload<T> {
 
     private SocketAddress address;
     private Map<String, Object> header;
+    private ContentType contentType;
     private String version;
     private T body;
 
@@ -18,6 +21,11 @@ public class LightHTTPPayload<T> implements HTTPPayload<T> {
         this.header = header;
         this.version = version;
         this.body = body;
+
+        // Only ContentType is allow to occupy HTTPHeaders.CONTENT_TYPE in the header map.
+        if (this.header.containsKey(HTTPHeaders.CONTENT_TYPE)) {
+            this.contentType = (ContentType) this.header.remove(HTTPHeaders.CONTENT_TYPE);
+        }
     }
 
     @Override
@@ -33,6 +41,11 @@ public class LightHTTPPayload<T> implements HTTPPayload<T> {
     @Override
     public Map<String, Object> getHeader() {
         return header;
+    }
+
+    @Override
+    public ContentType getContentType() {
+        return contentType;
     }
 
     @Override
@@ -52,4 +65,5 @@ public class LightHTTPPayload<T> implements HTTPPayload<T> {
                 ", body=" + body +
                 '}';
     }
+
 }

@@ -21,11 +21,6 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 		payloadParser = new LightHTTPPayloadParser();
 		sessionMap = new ConcurrentHashMap<>();
 	}
-	
-	@Override
-	public void putResponse(SocketAddress address, ByteBuffer payload) {
-
-	}
 
 	@Override
 	public void putRequest(SocketAddress address, List<ByteBuffer> payload) {
@@ -39,13 +34,14 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 		HTTPSession session = sessionMap.get(address);
 		if (session == null) {
 			session = new LightHTTPSession(address);
+			sessionMap.put(address, session);
 		}
 		return session;
 	}
 
 	@Override
-	public Collection<HTTPSession> getSessions() {
-		return sessionMap.values();
+	public Map<SocketAddress, HTTPSession> getSessionMap() {
+		return sessionMap;
 	}
 
 	@Override

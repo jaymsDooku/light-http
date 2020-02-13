@@ -6,6 +6,7 @@ import io.jayms.http.light.interfaces.HTTPResponse;
 import io.jayms.http.light.interfaces.HTTPSession;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -14,6 +15,7 @@ public class LightHTTPSession implements HTTPSession {
     private SocketAddress address;
     private Queue<HTTPRequest> requestQueue;
     private Queue<HTTPResponse> responseQueue;
+    private ByteBuffer currentBuffer;
 
     public LightHTTPSession(SocketAddress address) {
         this.address = address;
@@ -46,4 +48,32 @@ public class LightHTTPSession implements HTTPSession {
         return responseQueue.poll();
     }
 
+    @Override
+    public int responses() {
+        return responseQueue.size();
+    }
+
+    @Override
+    public int requests() {
+        return requestQueue.size();
+    }
+
+    @Override
+    public ByteBuffer getCurrentBuffer() {
+        return currentBuffer;
+    }
+
+    @Override
+    public void setCurrentBuffer(ByteBuffer currentBuffer) {
+        this.currentBuffer = currentBuffer;
+    }
+
+    @Override
+    public String toString() {
+        return "LightHTTPSession{" +
+                "address=" + address +
+                ", requestQueue=" + requestQueue +
+                ", responseQueue=" + responseQueue +
+                '}';
+    }
 }

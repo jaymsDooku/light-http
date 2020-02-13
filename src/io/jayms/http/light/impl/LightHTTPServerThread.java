@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import io.jayms.http.light.interfaces.HTTPPayload;
+import io.jayms.http.light.interfaces.HTTPSession;
 import io.jayms.http.light.interfaces.HTTPSessionManager;
 import io.jayms.http.light.interfaces.util.SelectionKeyHandler;
 
@@ -95,18 +95,29 @@ public class LightHTTPServerThread extends Thread {
 		public void write(SelectionKey key) throws IOException {
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
-			HTTPPayload payload = httpServer.sessionManager().getSession(address).pollResponse();
-			if (payload == null) {
+			HTTPSession session = httpServer.sessionManager().getSession(address);
+			if (session.responses() <= 0) {
 				return;
 			}
-			System.out.println("wrote to " + address);
-			ByteBuffer buffer = payload.encode();
-			if (buffer == null) {
-				return;
+			ByteBuffer current = session.getCurrentBuffer();
+			if (current == null) {
+				HTTPPayload payload = session.pollResponse();
+				if (payload == null) {
+					return;
+				}
+				ByteBuffer buffer = payload.encode();
+				if (buffer == null) {
+					return;
+				}
+				current = buffer;
+				session.setCurrentBuffer(current);
 			}
-			if (buffer.hasRemaining()) {
-				client.write(buffer);
+			System.out.println("current: " + Arrays.toString(current.array()));
+
+			if (current.hasRemaining()) {
+				client.write(current);
 			} else {
+				session.setCurrentBuffer(null);
 				client.close();
 			}
 		}

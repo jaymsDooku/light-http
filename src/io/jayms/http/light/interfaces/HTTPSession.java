@@ -1,6 +1,7 @@
 package io.jayms.http.light.interfaces;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 public interface HTTPSession {
@@ -14,5 +15,13 @@ public interface HTTPSession {
     void putResponse(HTTPResponse response);
 
     HTTPResponse pollResponse();
+
+    int responses();
+
+    int requests();
+
+    ByteBuffer getCurrentBuffer();
+
+    void setCurrentBuffer(ByteBuffer buffer);
 
 }

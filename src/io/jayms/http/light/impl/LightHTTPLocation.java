@@ -37,5 +37,12 @@ public class LightHTTPLocation implements HTTPLocation {
 	public int hashCode() {
 		return Objects.hash(path, method);
 	}
-	
+
+	@Override
+	public String toString() {
+		return "LightHTTPLocation{" +
+				"path='" + path + '\'' +
+				", method=" + method +
+				'}';
+	}
 }

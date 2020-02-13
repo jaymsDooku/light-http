@@ -2,33 +2,31 @@ package io.jayms.http.light.impl;
 
 import io.jayms.http.light.interfaces.*;
 
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.*;
 
 public class LightHTTPRequestProcessor extends Thread {
 
+    private HTTPContext context;
     private HTTPSessionManager sessionManager;
-    private Map<HTTPMethod, HTTPRequestHandler> requestHandlerMap;
 
     public LightHTTPRequestProcessor(HTTPServer server) {
         this.sessionManager = server.sessionManager();
-        this.requestHandlerMap = new EnumMap<HTTPMethod, HTTPRequestHandler>(HTTPMethod.class);
-    }
-
-    public void registerRequestHandler(HTTPMethod method, HTTPRequestHandler httpRequestHandler) {
-        requestHandlerMap.put(method, httpRequestHandler);
+        this.context = server.context();
     }
 
     @Override
     public void run() {
         while (true) {
-            Collection<HTTPSession> sessionCollection = sessionManager.getSessions();
-            if (sessionCollection.isEmpty()) continue;
+            Map<SocketAddress, HTTPSession> sessionMap = sessionManager.getSessionMap();
+            if (sessionMap.isEmpty()) continue;
 
             Set<SocketAddress> removeKeys = new HashSet<>();
-            Iterator<HTTPSession> sessionIterator = sessionCollection.iterator();
+            Iterator<Map.Entry<SocketAddress, HTTPSession>> sessionIterator = sessionMap.entrySet().iterator();
             while (sessionIterator.hasNext()) {
-                HTTPSession session = sessionIterator.next();
+                Map.Entry<SocketAddress, HTTPSession> sessionEntry = sessionIterator.next();
+                HTTPSession session = sessionEntry.getValue();
                 SocketAddress address = session.getAddress();
                 sessionIterator.remove();
 
@@ -38,11 +36,18 @@ public class LightHTTPRequestProcessor extends Thread {
                     continue;
                 }
 
-                HTTPRequestHandler handler = requestHandlerMap.get(request.getMethod());
+                HTTPLocation location = request.getLocation();
+                //System.out.println("location: " + location);
+                HTTPRequestHandler handler = context.getHandler(location);
+                //System.out.println("handler: " + handler);
                 if (handler == null) continue;
 
                 HTTPResponse response = handler.handle(request);
                 session.putResponse(response);
+                sessionMap.put(address, session);
+                /*System.out.println("response: " + response);
+                System.out.println("session: " + session);
+                System.out.println("session2: " + sessionManager.getSession(address));*/
             }
 
             for (SocketAddress removeKey : removeKeys) {

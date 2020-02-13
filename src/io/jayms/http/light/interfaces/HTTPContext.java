@@ -2,8 +2,8 @@ package io.jayms.http.light.interfaces;
 
 public interface HTTPContext {
 
-	void registerHandler(HTTPLocation location, HTTPHandler handler);
+	void registerHandler(HTTPLocation location, HTTPRequestHandler handler);
 	
-	HTTPHandler getHandler(HTTPLocation location);
+	HTTPRequestHandler getHandler(HTTPLocation location);
 	
 }

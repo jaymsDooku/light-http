@@ -41,8 +41,7 @@ public class LightHTTPPayloadParser implements HTTPPayloadParser {
         HTTPMethod method = HTTPMethod.valueOf(protocolMethod);
         HTTPPayload payload = LightHTTPRequest.builder(address, protocolVersion)
                 .header(payloadHeader)
-                .method(method)
-                .path(protocolPath)
+                .location(new LightHTTPLocation(protocolPath, method))
                 .build();
         System.out.println("payloadHeader: " + payloadHeader);
         return payload;

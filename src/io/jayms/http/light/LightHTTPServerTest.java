@@ -1,21 +1,37 @@
 package io.jayms.http.light;
 
 import io.jayms.http.light.impl.LightHTTPLocation;
+import io.jayms.http.light.impl.LightHTTPResponse;
 import io.jayms.http.light.impl.LightHTTPServer;
-import io.jayms.http.light.interfaces.HTTPHandler;
-import io.jayms.http.light.interfaces.HTTPMethod;
-import io.jayms.http.light.interfaces.HTTPPayload;
-import io.jayms.http.light.interfaces.HTTPServer;
+import io.jayms.http.light.interfaces.*;
+import io.jayms.http.light.interfaces.content.ContentType;
 
-public class LightHTTPServerTest {
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class LightHTTPServerTest<T> {
 
 	public static void main(String[] args) {
 		HTTPServer server = new LightHTTPServer(8080);
-		server.context().registerHandler(new LightHTTPLocation("/", HTTPMethod.GET), new HTTPHandler() {
+		server.context().registerHandler(new LightHTTPLocation("/", HTTPMethod.GET), new HTTPRequestHandler() {
 
 			@Override
-			public void handle(HTTPMethod method, HTTPPayload payload) {
-				
+			public HTTPResponse handle(HTTPRequest request) {
+				String path = request.getLocation().path();
+				if (path.equals("/")) {
+					Map<String, Object> header = new HashMap<>();
+					header.put(HTTPHeaders.SERVER, "jayms-light-http");
+					header.put(HTTPHeaders.CONTENT_TYPE, ContentType.TEXT_HTML);
+					header.put(HTTPHeaders.DATE, new Date().toGMTString());
+
+					HTTPResponse<String> response = LightHTTPResponse.builder(request.getAddress(), request.getVersion())
+							.header(header)
+							.body("<html><body>hello world</body></html>")
+							.build();
+					return response;
+				}
+				return null;
 			}
 
 		});
@@ -26,5 +42,5 @@ public class LightHTTPServerTest {
 		String[] sp = s.split("\r\n");
 		System.out.println("sp len : " + sp.length);*/
 	}
-	
+
 }
