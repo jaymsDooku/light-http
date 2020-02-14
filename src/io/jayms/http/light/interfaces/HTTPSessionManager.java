@@ -12,6 +12,8 @@ public interface HTTPSessionManager {
 
 	HTTPSession getSession(SocketAddress address);
 
+	void replaceSession(SocketAddress address, HTTPSession session);
+
 	Map<SocketAddress, HTTPSession> getSessionMap();
 
 	void terminate(SocketAddress address);

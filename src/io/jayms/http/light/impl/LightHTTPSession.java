@@ -30,7 +30,7 @@ public class LightHTTPSession implements HTTPSession {
 
     @Override
     public void putRequest(HTTPRequest request) {
-        requestQueue.add(request);
+        requestQueue.offer(request);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class LightHTTPSession implements HTTPSession {
 
     @Override
     public void putResponse(HTTPResponse response) {
-        responseQueue.add(response);
+        responseQueue.offer(response);
     }
 
     @Override

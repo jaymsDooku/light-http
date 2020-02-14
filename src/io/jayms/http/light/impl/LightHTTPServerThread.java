@@ -42,7 +42,8 @@ public class LightHTTPServerThread extends Thread {
 			ex.printStackTrace();
 			return;
 		}
-		
+
+		boolean writeOnce = false;
 		while (true) {
 			try {
 				selector.select();
@@ -50,20 +51,26 @@ public class LightHTTPServerThread extends Thread {
 				e.printStackTrace();
 				break;
 			}
-			
+
 			Set<SelectionKey> readyKeys = selector.selectedKeys();
 			Iterator<SelectionKey> readyIterator = readyKeys.iterator();
 			while (readyIterator.hasNext()) {
 				SelectionKey key = readyIterator.next();
-				
+
 				try {
 					if (key.isAcceptable()) {
+						System.out.println("accepted key: " + key);
 						keyHandler.accept(key);
 					}
 					if (key.isReadable()) {
+						System.out.println("read key: " + key);
 						keyHandler.read(key);
 					}
 					if (key.isWritable()) {
+						if (!writeOnce) {
+							System.out.println("write key: " + key);
+							writeOnce = true;
+						}
 						keyHandler.write(key);
 					}
 				} catch (IOException ex) {
@@ -89,13 +96,16 @@ public class LightHTTPServerThread extends Thread {
 			SocketChannel client = channel.accept();
 			client.configureBlocking(false);
 			client.register(selector, SelectionKey.OP_READ);
+			System.out.println("accepted: " + client);
 		}
 		
 		@Override
 		public void write(SelectionKey key) throws IOException {
+			HTTPSessionManager sessionManager = httpServer.sessionManager();
+
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
-			HTTPSession session = httpServer.sessionManager().getSession(address);
+			HTTPSession session = sessionManager.getSession(address);
 			if (session.responses() <= 0) {
 				return;
 			}
@@ -113,12 +123,17 @@ public class LightHTTPServerThread extends Thread {
 				session.setCurrentBuffer(current);
 			}
 			System.out.println("current: " + Arrays.toString(current.array()));
+			System.out.println("session: " + session.toString());
+			System.out.println("sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
 
 			if (current.hasRemaining()) {
 				client.write(current);
-			} else {
+			}
+
+			if (!current.hasRemaining()) {
 				session.setCurrentBuffer(null);
 				client.close();
+				System.out.println("closed connection");
 			}
 		}
 		
@@ -127,6 +142,7 @@ public class LightHTTPServerThread extends Thread {
 			HTTPSessionManager sessionManager = httpServer.sessionManager();
 			
 			SocketChannel client = (SocketChannel) key.channel();
+			System.out.println("reading client: " + client);
 			SocketAddress address = client.getRemoteAddress();
 
 			List<ByteBuffer> buffers = new ArrayList<>();
@@ -137,10 +153,12 @@ public class LightHTTPServerThread extends Thread {
 				read = client.read(buffer);
 				if (read > 0) {
 					buffer.flip();
+					System.out.println("adding buffer: " + Arrays.toString(buffer.array()));
 					buffers.add(buffer);
 				}
 			} while (read > 0);
 			sessionManager.putRequest(address, buffers);
+			System.out.println("sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
 			
 			key.interestOps(SelectionKey.OP_WRITE);
 		}

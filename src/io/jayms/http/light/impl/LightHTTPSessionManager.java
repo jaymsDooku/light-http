@@ -40,7 +40,12 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 	}
 
 	@Override
-	public Map<SocketAddress, HTTPSession> getSessionMap() {
+	public void replaceSession(SocketAddress address, HTTPSession session) {
+		sessionMap.put(address, session);
+	}
+
+	@Override
+	public synchronized Map<SocketAddress, HTTPSession> getSessionMap() {
 		return sessionMap;
 	}
 

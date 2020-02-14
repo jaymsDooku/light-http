@@ -1,5 +1,6 @@
 package io.jayms.http.light.impl;
 
+import io.jayms.http.light.interfaces.HTTPHeaders;
 import io.jayms.http.light.interfaces.HTTPPayload;
 import io.jayms.http.light.interfaces.HTTPResponse;
 import io.jayms.http.light.interfaces.HTTPStatusCode;
@@ -38,6 +39,17 @@ public class LightHTTPResponse<T> extends LightHTTPPayload<T> implements HTTPRes
         headerBuilder.append("\r\n");
 
         Map<String, Object> header = getHeader();
+        header.put(HTTPHeaders.CONTENT_TYPE, getContentType().getText());
+
+        T body = getBody();
+        ContentType contentType = getContentType();
+        System.out.println("body: " + body);
+        ByteBuffer encodedPayload = contentType.getEncoder().encode(StandardCharsets.UTF_8, body);
+        System.out.println("encodedPayload: " + Arrays.toString(encodedPayload.array()));
+
+        int contentLength = encodedPayload.capacity();
+        header.put(HTTPHeaders.CONTENT_LENGTH, contentLength);
+
         for (Map.Entry<String, Object> headerEntry : header.entrySet()) {
             String key = headerEntry.getKey();
             Object value = headerEntry.getValue();
@@ -52,12 +64,6 @@ public class LightHTTPResponse<T> extends LightHTTPPayload<T> implements HTTPRes
         System.out.println("headerStr: " + headerStr);
         ByteBuffer headerBuffer = StandardCharsets.US_ASCII.encode(headerStr);
         System.out.println("headerBuffer: " + Arrays.toString(headerBuffer.array()));
-
-        T body = getBody();
-        ContentType contentType = getContentType();
-        System.out.println("body: " + body);
-        ByteBuffer encodedPayload = contentType.getEncoder().encode(StandardCharsets.UTF_8, body);
-        System.out.println("encodedPayload: " + Arrays.toString(encodedPayload.array()));
 
         headerBuffer.flip();
         encodedPayload.flip();

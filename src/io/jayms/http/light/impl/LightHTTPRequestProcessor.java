@@ -32,7 +32,6 @@ public class LightHTTPRequestProcessor extends Thread {
 
                 HTTPRequest request = session.popRequest();
                 if (request == null) {
-                    removeKeys.add(address);
                     continue;
                 }
 
@@ -40,19 +39,23 @@ public class LightHTTPRequestProcessor extends Thread {
                 //System.out.println("location: " + location);
                 HTTPRequestHandler handler = context.getHandler(location);
                 //System.out.println("handler: " + handler);
-                if (handler == null) continue;
+                //System.out.println("session: " + session);
+                if (handler == null) {
+                    continue;
+                }
 
                 HTTPResponse response = handler.handle(request);
                 session.putResponse(response);
-                sessionMap.put(address, session);
-                /*System.out.println("response: " + response);
-                System.out.println("session: " + session);
-                System.out.println("session2: " + sessionManager.getSession(address));*/
+                sessionManager.replaceSession(address, session);
+                //System.out.println("response: " + response);
+                //System.out.println("session: " + session);
+                //System.out.println("session2: " + sessionManager.getSession(address));
             }
 
-            for (SocketAddress removeKey : removeKeys) {
+            /*for (SocketAddress removeKey : removeKeys) {
+                System.out.println("terminate " + removeKey);
                 sessionManager.terminate(removeKey);
-            }
+            }*/
         }
     }
 }
