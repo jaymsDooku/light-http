@@ -45,7 +45,7 @@ public class LightHTTPSessionManager implements HTTPSessionManager {
 	}
 
 	@Override
-	public synchronized Map<SocketAddress, HTTPSession> getSessionMap() {
+	public Map<SocketAddress, HTTPSession> getSessionMap() {
 		return sessionMap;
 	}
 

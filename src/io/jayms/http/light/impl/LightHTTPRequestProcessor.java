@@ -28,18 +28,18 @@ public class LightHTTPRequestProcessor extends Thread {
                 Map.Entry<SocketAddress, HTTPSession> sessionEntry = sessionIterator.next();
                 HTTPSession session = sessionEntry.getValue();
                 SocketAddress address = session.getAddress();
-                sessionIterator.remove();
 
                 HTTPRequest request = session.popRequest();
                 if (request == null) {
+                    //sessionIterator.remove();
                     continue;
                 }
 
                 HTTPLocation location = request.getLocation();
-                //System.out.println("location: " + location);
+                System.out.println("location: " + location);
                 HTTPRequestHandler handler = context.getHandler(location);
-                //System.out.println("handler: " + handler);
-                //System.out.println("session: " + session);
+                System.out.println("handler: " + handler);
+                System.out.println("session: " + session);
                 if (handler == null) {
                     continue;
                 }
@@ -47,9 +47,9 @@ public class LightHTTPRequestProcessor extends Thread {
                 HTTPResponse response = handler.handle(request);
                 session.putResponse(response);
                 sessionManager.replaceSession(address, session);
-                //System.out.println("response: " + response);
-                //System.out.println("session: " + session);
-                //System.out.println("session2: " + sessionManager.getSession(address));
+                System.out.println("response: " + response);
+                System.out.println("session: " + session);
+                System.out.println("session2: " + sessionManager.getSession(address));
             }
 
             /*for (SocketAddress removeKey : removeKeys) {

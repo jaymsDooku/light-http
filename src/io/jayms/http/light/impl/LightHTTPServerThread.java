@@ -124,7 +124,7 @@ public class LightHTTPServerThread extends Thread {
 			}
 			System.out.println("current: " + Arrays.toString(current.array()));
 			System.out.println("session: " + session.toString());
-			System.out.println("sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
+			System.out.println("write sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
 
 			if (current.hasRemaining()) {
 				client.write(current);
@@ -158,7 +158,7 @@ public class LightHTTPServerThread extends Thread {
 				}
 			} while (read > 0);
 			sessionManager.putRequest(address, buffers);
-			System.out.println("sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
+			System.out.println("read sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
 			
 			key.interestOps(SelectionKey.OP_WRITE);
 		}
