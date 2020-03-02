@@ -2,16 +2,16 @@ package io.jayms.http.light.impl;
 
 import io.jayms.http.light.interfaces.*;
 
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.*;
 
 public class LightHTTPRequestProcessor extends Thread {
 
     private HTTPContext context;
-    private HTTPSessionManager sessionManager;
+    private HTTPPayloadManager sessionManager;
 
     public LightHTTPRequestProcessor(HTTPServer server) {
+        super("LightHTTPRequestProcessor");
         this.sessionManager = server.sessionManager();
         this.context = server.context();
     }
@@ -23,15 +23,12 @@ public class LightHTTPRequestProcessor extends Thread {
             if (sessionMap.isEmpty()) continue;
 
             Set<SocketAddress> removeKeys = new HashSet<>();
-            Iterator<Map.Entry<SocketAddress, HTTPSession>> sessionIterator = sessionMap.entrySet().iterator();
-            while (sessionIterator.hasNext()) {
-                Map.Entry<SocketAddress, HTTPSession> sessionEntry = sessionIterator.next();
-                HTTPSession session = sessionEntry.getValue();
-                SocketAddress address = session.getAddress();
+            Set<SocketAddress> allKeys = sessionMap.keySet();
+            for (SocketAddress address : allKeys) {
+                HTTPSession session = sessionMap.get(address);
 
-                HTTPRequest request = session.popRequest();
+                HTTPRequest request = session.peekRequest();
                 if (request == null) {
-                    //sessionIterator.remove();
                     continue;
                 }
 
@@ -40,16 +37,11 @@ public class LightHTTPRequestProcessor extends Thread {
                 HTTPRequestHandler handler = context.getHandler(location);
                 System.out.println("handler: " + handler);
                 System.out.println("session: " + session);
-                if (handler == null) {
-                    continue;
-                }
 
                 HTTPResponse response = handler.handle(request);
                 session.putResponse(response);
+                session.removeRequest(request);
                 sessionManager.replaceSession(address, session);
-                System.out.println("response: " + response);
-                System.out.println("session: " + session);
-                System.out.println("session2: " + sessionManager.getSession(address));
             }
 
             /*for (SocketAddress removeKey : removeKeys) {

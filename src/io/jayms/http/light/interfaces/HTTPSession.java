@@ -10,7 +10,9 @@ public interface HTTPSession {
 
     void putRequest(HTTPRequest request);
 
-    HTTPRequest popRequest();
+    HTTPRequest peekRequest();
+
+    void removeRequest(HTTPRequest request);
 
     void putResponse(HTTPResponse response);
 

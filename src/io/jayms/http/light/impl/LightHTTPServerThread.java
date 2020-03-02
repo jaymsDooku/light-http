@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import io.jayms.http.light.interfaces.HTTPPayload;
 import io.jayms.http.light.interfaces.HTTPSession;
-import io.jayms.http.light.interfaces.HTTPSessionManager;
+import io.jayms.http.light.interfaces.HTTPPayloadManager;
 import io.jayms.http.light.interfaces.util.SelectionKeyHandler;
 
 public class LightHTTPServerThread extends Thread {
@@ -26,6 +24,7 @@ public class LightHTTPServerThread extends Thread {
 	private ServerSelectionKeyHandler keyHandler;
 	
 	public LightHTTPServerThread(LightHTTPServer httpServer) {
+		super("LightHTTPServer");
 		this.httpServer = httpServer;
 		this.keyHandler = new ServerSelectionKeyHandler();
 	}
@@ -46,7 +45,8 @@ public class LightHTTPServerThread extends Thread {
 		boolean writeOnce = false;
 		while (true) {
 			try {
-				selector.select();
+				int ready = selector.select();
+				if (ready == 0) continue;
 			} catch (IOException e) {
 				e.printStackTrace();
 				break;
@@ -56,6 +56,7 @@ public class LightHTTPServerThread extends Thread {
 			Iterator<SelectionKey> readyIterator = readyKeys.iterator();
 			while (readyIterator.hasNext()) {
 				SelectionKey key = readyIterator.next();
+				readyIterator.remove();
 
 				try {
 					if (key.isAcceptable()) {
@@ -79,8 +80,6 @@ public class LightHTTPServerThread extends Thread {
 						key.channel().close();
 					} catch (IOException cex) {}
 				}
-
-				readyIterator.remove();
 			}
 		}
 	}
@@ -101,7 +100,7 @@ public class LightHTTPServerThread extends Thread {
 		
 		@Override
 		public void write(SelectionKey key) throws IOException {
-			HTTPSessionManager sessionManager = httpServer.sessionManager();
+			HTTPPayloadManager sessionManager = httpServer.sessionManager();
 
 			SocketChannel client = (SocketChannel) key.channel();
 			SocketAddress address = client.getRemoteAddress();
@@ -132,14 +131,14 @@ public class LightHTTPServerThread extends Thread {
 
 			if (!current.hasRemaining()) {
 				session.setCurrentBuffer(null);
-				client.close();
-				System.out.println("closed connection");
 			}
+
+			key.interestOps(SelectionKey.OP_ACCEPT);
 		}
 		
 		@Override
 		public void read(SelectionKey key) throws IOException {
-			HTTPSessionManager sessionManager = httpServer.sessionManager();
+			HTTPPayloadManager sessionManager = httpServer.sessionManager();
 			
 			SocketChannel client = (SocketChannel) key.channel();
 			System.out.println("reading client: " + client);
@@ -151,14 +150,15 @@ public class LightHTTPServerThread extends Thread {
 			do {
 				buffer = ByteBuffer.allocate(1024 * 8);
 				read = client.read(buffer);
+				System.out.println("read: " + read);
 				if (read > 0) {
 					buffer.flip();
 					System.out.println("adding buffer: " + Arrays.toString(buffer.array()));
 					buffers.add(buffer);
 				}
 			} while (read > 0);
-			sessionManager.putRequest(address, buffers);
 			System.out.println("read sessionMap: " + sessionManager.getSessionMap() + " hashCode: " + sessionManager.getSessionMap().hashCode());
+			sessionManager.putRequest(address, buffers);
 			
 			key.interestOps(SelectionKey.OP_WRITE);
 		}

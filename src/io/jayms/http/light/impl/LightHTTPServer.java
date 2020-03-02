@@ -2,24 +2,18 @@ package io.jayms.http.light.impl;
 
 import io.jayms.http.light.interfaces.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class LightHTTPServer implements HTTPServer {
 
 	private int port;
 	private HTTPContext context;
-	private HTTPSessionManager sessionManager;
+	private HTTPPayloadManager sessionManager;
 	
 	private Thread serverThread;
 	private LightHTTPRequestProcessor requestProcessor;
 	
 	public LightHTTPServer(int port) {
 		this.context = new LightHTTPContext();
-		this.sessionManager = new LightHTTPSessionManager();
+		this.sessionManager = new LightHTTPPayloadManager();
 		this.port = port;
 	}
 	
@@ -43,7 +37,7 @@ public class LightHTTPServer implements HTTPServer {
 	}
 	
 	@Override
-	public HTTPSessionManager sessionManager() {
+	public HTTPPayloadManager sessionManager() {
 		return sessionManager;
 	}
 

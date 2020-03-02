@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface HTTPSessionManager {
+public interface HTTPPayloadManager {
 	
 	void putRequest(SocketAddress address, List<ByteBuffer> payload);
 

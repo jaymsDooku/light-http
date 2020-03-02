@@ -2,7 +2,8 @@ package io.jayms.http.light.interfaces;
 
 public enum HTTPStatusCode {
 
-    OK(200);
+    OK(200),
+    NOT_FOUND(404);
 
     private int statusCode;
 

@@ -34,8 +34,13 @@ public class LightHTTPSession implements HTTPSession {
     }
 
     @Override
-    public HTTPRequest popRequest() {
-        return requestQueue.poll();
+    public HTTPRequest peekRequest() {
+        return requestQueue.peek();
+    }
+
+    @Override
+    public void removeRequest(HTTPRequest request) {
+        requestQueue.remove(request);
     }
 
     @Override

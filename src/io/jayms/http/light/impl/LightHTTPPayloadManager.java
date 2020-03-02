@@ -2,22 +2,18 @@ package io.jayms.http.light.impl;
 
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.jayms.http.light.interfaces.*;
 
-public class LightHTTPSessionManager implements HTTPSessionManager {
+public class LightHTTPPayloadManager implements HTTPPayloadManager {
 
 	private HTTPPayloadParser payloadParser;
 	private Map<SocketAddress, HTTPSession> sessionMap;
 	
-	public LightHTTPSessionManager() {
+	public LightHTTPPayloadManager() {
 		payloadParser = new LightHTTPPayloadParser();
 		sessionMap = new ConcurrentHashMap<>();
 	}

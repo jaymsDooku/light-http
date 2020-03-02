@@ -5,5 +5,7 @@ public interface HTTPContext {
 	void registerHandler(HTTPLocation location, HTTPRequestHandler handler);
 	
 	HTTPRequestHandler getHandler(HTTPLocation location);
+
+	HTTPRequestHandler notFoundHandler();
 	
 }
