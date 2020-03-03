@@ -133,7 +133,7 @@ public class LightHTTPServerThread extends Thread {
 				session.setCurrentBuffer(null);
 			}
 
-			key.interestOps(SelectionKey.OP_ACCEPT);
+			key.interestOps(SelectionKey.OP_READ);
 		}
 		
 		@Override
